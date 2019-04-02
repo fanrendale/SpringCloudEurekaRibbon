@@ -1,5 +1,6 @@
 package com.xjf.eurekaribbon.service;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -15,6 +16,11 @@ public class EurekaRibbonService {
     @Autowired
     private RestTemplate restTemplate;
 
+    /**
+     * 加入了@HystrixCommand注解，并设置了服务调用失败的回调方法 fallbackMethod = "getInfoFailure"
+     * @return
+     */
+    @HystrixCommand(fallbackMethod = "getInfoFailure")
     public String getInfo(){
         String message;
 
@@ -27,6 +33,15 @@ public class EurekaRibbonService {
             message = e.getMessage();
         }
 
+        return message;
+    }
+
+    /**
+     * 服务EUREKA-PROVIDER/info调用失败的回调方法
+     * @return
+     */
+    public String getInfoFailure(){
+        String message = "网络繁忙，请稍后再试-_-。ps：服务消费者自己提供的信息";
         return message;
     }
 }
